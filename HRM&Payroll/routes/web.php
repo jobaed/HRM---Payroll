@@ -66,10 +66,12 @@ Route::get( '/user-profile-full', [UserController::class, 'UserFullProfile'] )
 Route::post( '/userUdate', [UserController::class, 'userUdate'] )
     ->middleware( [TokenVerificationMiddleware::class] );
 
-
-
 // Employee Module
 Route::get( '/employee', [UserController::class, 'userPageForAdmin'] )
     ->middleware( [TokenVerificationMiddleware::class] );
 Route::get( '/employee-list', [UserController::class, 'employeeList'] )
+    ->middleware( [TokenVerificationMiddleware::class] );
+Route::post( '/single-employee-list', [UserController::class, 'singleEmployee'] )
+    ->middleware( [TokenVerificationMiddleware::class] );
+Route::post( '/delete-employee', [UserController::class, 'deleteEmployee'] )
     ->middleware( [TokenVerificationMiddleware::class] );

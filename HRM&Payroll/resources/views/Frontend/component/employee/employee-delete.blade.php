@@ -31,10 +31,10 @@
     })
     $("#confirmDelete").on("click", async function() {
         let id = $(".catID").html();
-        let res = await axios.post("/delete-customer", {
+        let res = await axios.post("/delete-employee", {
             id: id
         });
-        // console.log(res.data);
+        console.log(res.data);
         if (res.data.status === "success") {
             // e.preventDefault();
             $('#delete-modal').modal('hide');

@@ -65,22 +65,131 @@ class UserController extends Controller {
         }
 
         try {
-            User::create( [
-                'firstName' => $request->input( 'firstName' ),
-                'lastName'  => $request->input( 'lastName' ),
-                'email'     => $request->input( 'email' ),
-                'mobile'    => $request->input( 'mobile' ),
-                'password'  => $request->input( 'password' ),
-            ] );
-            return response()->json( [
-                'status'  => 'success',
-                'message' => 'User Registration Successfully',
-            ], 200 );
+
+            $user_id = $request->header( 'id' );
+
+            if ( $request->file( 'profile' ) ) {
+
+                DB::beginTransaction();
+
+                try {
+
+                    if ( $request->input( 'about_me' ) == '' ) {
+                        $aboutMe = "Your About Me";
+                    } else {
+                        $aboutMe = $request->input( 'about_me' );
+                    }
+                    if ( $request->input( 'selary' ) == '' ) {
+                        $Employeeselary = "Neiogatable";
+                    } else {
+                        $aboutMe = $request->input( 'selary' );
+                    }
+                    if ( $request->input( 'role' ) == '' ) {
+                        $role = "user";
+                    } else {
+                        $role = $request->input( 'role' );
+                    }
+
+                    // Prepare File Name & Path
+                    $img = $request->file( 'profile' );
+
+                    $t = time();
+                    $file_name = $img->getClientOriginalName();
+                    $img_name = "{$user_id}-{$t}-{$file_name}";
+                    $img_url = "profile/{$img_name}";
+
+                    // Upload File
+                    $img->move( public_path( 'profile' ), $img_name );
+
+                    // Insert User;
+                    $user_data = new User();
+                    $user_data->firstName = $request->input( 'firstName' );
+                    $user_data->lastName = $request->input( 'lastName' );
+                    $user_data->mobile = $request->input( 'mobile' );
+                    $user_data->email = $request->input( 'email' );
+                    $user_data->password = $request->input( 'password' );
+                    $user_data->role = $role;
+
+                    $user_data->save();
+
+                    $employeeInsert_id = $user_data->id;
+
+                    // Insert User Details
+                    UserDetails::create( [
+                        'user_id'  => $employeeInsert_id,
+                        'profile'  => $img_url,
+                        'about_me' => $request->input( 'about_me' ),
+                        'selary'   => $request->input( 'selary' ),
+                    ] );
+
+                    DB::commit();
+
+                    return response()->json( [
+                        'status'  => 'success',
+                        'message' => 'Employee Create',
+                    ], 200 );
+
+                } catch ( Exception $e ) {
+                    DB::rollBack();
+                    return $e;
+                }
+            } else {
+                DB::beginTransaction();
+
+                if ( $request->input( 'about_me' ) == '' ) {
+                    $aboutMe = "Your About Me";
+                } else {
+                    $aboutMe = $request->input( 'about_me' );
+                }
+                if ( $request->input( 'selary' ) == '' ) {
+                    $Employeeselary = "Neiogatable";
+                } else {
+                    $aboutMe = $request->input( 'selary' );
+                }
+                if ( $request->input( 'role' ) == '' ) {
+                    $role = "user";
+                } else {
+                    $role = $request->input( 'role' );
+                }
+
+                try {
+
+                    // Insert User;
+                    $user_data = new User();
+                    $user_data->firstName = $request->input( 'firstName' );
+                    $user_data->lastName = $request->input( 'lastName' );
+                    $user_data->mobile = $request->input( 'mobile' );
+                    $user_data->email = $request->input( 'email' );
+                    $user_data->password = $request->input( 'password' );
+                    $user_data->role = $role;
+
+                    $user_data->save();
+                    $employeeInsert_id = $user_data->id;
+
+                    UserDetails::create( [
+                        'about_me' => $aboutMe,
+                        'user_id'  => $employeeInsert_id,
+                        'profile'  => "profile/demoProfile.webp",
+                        'selary'   => $Employeeselary,
+                    ] );
+
+                    DB::commit();
+                    return response()->json( [
+                        'status'  => 'success',
+                        'message' => 'User Update Successfull',
+                    ], 200 );
+
+                } catch ( Exception $e ) {
+                    DB::rollBack();
+                    return $e;
+                }
+            }
+
         } catch ( Exception $e ) {
             return response()->json( [
                 'status'  => 'failed',
-                'message' => 'User Registration Failed',
-            ], 400 );
+                'message' => $e,
+            ], 200 );
         }
 
     }
@@ -401,12 +510,80 @@ class UserController extends Controller {
 
     // Employee List
     public function employeeList( Request $request ) {
-        // $user_id = $request->header( 'id' );
-        $data = User::all();
+        $user_email = $request->header( 'email' );
+        $data = User::with( 'UserDetail' )->where('email', '!=', $user_email)->get();
         if ( $data->count() == 0 ) {
-            return $this->error( 'No Data', 'No Data Found', '200' );
+            return response()->json( [
+                'status'  => 'error',
+                'message' => 'Data Not Found',
+                'data'    => null,
+            ] );
         } else {
-            return $this->success( $data, 'Success', '200' );
+            return response()->json( [
+                'status'  => 'success',
+                'message' => 'Request Successfull',
+                'data'    => $data,
+            ] );
+        }
+    }
+    // Get Single Employee List
+    public function singleEmployee( Request $request ) {
+        $id = $request->input( 'id' );
+        $data = User::with( 'UserDetail' )->where( 'id', '=', $id )->first();
+
+        if ( $data ) {
+            return response()->json( [
+                'status'  => 'success',
+                'message' => 'Request Successfull',
+                'data'    => $data,
+            ] );
+
+        } else {
+            return response()->json( [
+                'status'  => 'error',
+                'message' => 'Employee Not Found',
+                'data'    => null,
+            ] );
+        }
+    }
+
+    // Delete Employee
+    public function deleteEmployee( Request $request ) {
+        $id = $request->input( 'id' );
+
+        $employee = User::where( 'id', '=', $id )->first();
+
+        if ( $employee->count() == 0 ) {
+            return response()->json( [
+                'status'  => 'failed',
+                'message' => 'Data Not Found',
+                'code'    => '200',
+            ] );
+        } else {
+
+            try {
+                DB::beginTransaction();
+                $employee_detaails = UserDetails::where( 'user_id', '=', $id )->first();
+                $employee_detaails->delete();
+                $employee->delete();
+
+                DB::commit();
+
+                return response()->json( [
+                    'status'  => 'success',
+                    'message' => 'Data has been Deleted',
+                    'code'    => '200',
+                ] );
+
+            } catch ( Exception $e ) {
+                DB::rollBack();
+                return response()->json( [
+                    'status'  => 'faild',
+                    'message' => $e,
+                    'code'    => '200',
+                ] );
+            }
+
         }
     }
 

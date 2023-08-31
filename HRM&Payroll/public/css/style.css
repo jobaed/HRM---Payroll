@@ -214,3 +214,8 @@ td {
 .product-links a:hover {
   color: #fbb72c;
 }
+.closeButton{
+  position: absolute;
+  top: 16px;
+  right: 20px;
+}

@@ -81,13 +81,13 @@
             </div>
         </a>
 
-        <a href="" class="side-bar-item">
+        <a href="{{ url('/employee') }}" class="side-bar-item">
             <div class="row ">
                 <div class="col-md-2">
                     <i class="bi bi-people"></i>
                 </div>
                 <div class="col-md-10">
-                    <span class="side-bar-item-caption">Customer</span>
+                    <span class="side-bar-item-caption">Employee</span>
                 </div>
             </div>
         </a>

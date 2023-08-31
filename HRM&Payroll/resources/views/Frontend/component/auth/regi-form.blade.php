@@ -13,11 +13,11 @@
                             </div>
                             <div class="col-md-4 p-2">
                                 <label>First Name</label>
-                                <input id="firstName" placeholder="First Name" class="form-control" type="text" />
+                                <input id="fname" placeholder="First Name" class="form-control" type="text" />
                             </div>
                             <div class="col-md-4 p-2">
                                 <label>Last Name</label>
-                                <input id="lastName" placeholder="Last Name" class="form-control" type="text" />
+                                <input id="lname" placeholder="Last Name" class="form-control" type="text" />
                             </div>
                             <div class="col-md-4 p-2">
                                 <label>Mobile Number</label>
@@ -43,14 +43,16 @@
 
 <script>
     async function onRegistration() {
-        let email = document.getElementById('email').value;
+
         let password = document.getElementById('password').value;
-        let firstName = document.getElementById('firstName').value;
-        let lastName = document.getElementById('lastName').value;
+        let firstName = document.getElementById('fname').value;
+        let lastName = document.getElementById('lname').value;
         let mobile = document.getElementById('mobile').value;
-        if (email.length === 0) {
-            errorToast("Email Required !");
-        } else if (password.length === 0) {
+        let email = document.getElementById('email').value;
+        // console.log(role);
+
+
+        if (password.length === 0) {
             errorToast("Password Required !")
         } else if (firstName.length === 0) {
             errorToast("First Name Required")
@@ -60,27 +62,33 @@
             errorToast("Mobile Number Required !")
         } else {
 
-
-            showLoader();
-            let data = {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password,
-                mobile: mobile
-            }
-            let res = await axios.post("/userApiData", data)
-            hideLoader();
-            if(res.status===200 && res.data['status']==="success"){
-                successToast(res.data['message']);
-                window.location.href="/login"
-            }
-            else{
-                errorToast(res.data['message']);
-            }
             
 
+            const formData = new FormData();
+            formData.append('password', password);
+            formData.append('firstName', firstName);
+            formData.append('lastName', lastName);
+            formData.append('mobile', mobile);
+            formData.append('email', email);
 
+            console.log(formData);
+            showLoader();
+
+            const res = await axios.post("/userApiData", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            console.log(res.data);
+            hideLoader();
+            if (res.status === 200 && res.data['status'] === "success") {
+                successToast('Create Employee');
+                window.location.href = "/login";
+
+            } else {
+                errorToast(res.data['message']);
+            }
         }
     }
 </script>
