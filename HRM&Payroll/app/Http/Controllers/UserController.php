@@ -169,7 +169,7 @@ class UserController extends Controller {
                     UserDetails::create( [
                         'about_me' => $aboutMe,
                         'user_id'  => $employeeInsert_id,
-                        'profile'  => "profile/demoProfile.webp",
+                        'profile'  => "noImage",
                         'selary'   => $Employeeselary,
                     ] );
 
@@ -396,7 +396,11 @@ class UserController extends Controller {
 
         try {
 
-            $user_id = $request->header( 'id' );
+            if ( $request->input( 'id' ) ) {
+                $user_id = $request->input( 'id' );
+            } else {
+                $user_id = $request->header( 'id' );
+            }
 
             if ( $request->file( 'profile' ) ) {
 
@@ -420,11 +424,13 @@ class UserController extends Controller {
                         File::delete( $old_image );
                     }
 
-                    User::where( 'email', '=', $email )->update( [
+                    User::where( 'id', '=', $user_id )->update( [
                         'firstName' => $request->input( 'firstName' ),
                         'lastName'  => $request->input( 'lastName' ),
+                        'email'  => $request->input( 'email' ),
                         'mobile'    => $request->input( 'mobile' ),
                         'password'  => $request->input( 'password' ),
+                        'role'      => $request->input( 'role' ),
                     ] );
 
                     // $user_id = $userData->id;
@@ -432,6 +438,7 @@ class UserController extends Controller {
                     UserDetails::where( 'user_id', '=', $user_id )->update( [
                         'profile'  => $img_url,
                         'about_me' => $request->input( 'about_me' ),
+                        'selary'   => $request->input( 'selary' ),
                     ] );
 
                     DB::commit();
@@ -443,23 +450,26 @@ class UserController extends Controller {
 
                 } catch ( Exception $e ) {
                     DB::rollBack();
-                    return "Faild";
+                    return $e;
                 }
             } else {
                 DB::beginTransaction();
 
                 try {
-                    User::where( 'email', '=', $email )->update( [
+                    User::where( 'id', '=', $user_id )->update( [
                         'firstName' => $request->input( 'firstName' ),
                         'lastName'  => $request->input( 'lastName' ),
                         'mobile'    => $request->input( 'mobile' ),
+                        'email'  => $request->input( 'email' ),
                         'password'  => $request->input( 'password' ),
+                        'role'      => $request->input( 'role' ),
                     ] );
 
                     // $user_id = $userData->id;
 
                     UserDetails::where( 'user_id', '=', $user_id )->update( [
                         'about_me' => $request->input( 'about_me' ),
+                        'selary'   => $request->input( 'selary' ),
                     ] );
 
                     DB::commit();
@@ -470,7 +480,7 @@ class UserController extends Controller {
 
                 } catch ( Exception $e ) {
                     DB::rollBack();
-                    return "Faild";
+                    return $e;
                 }
             }
 
@@ -484,9 +494,15 @@ class UserController extends Controller {
 
     // Get Profile Data
     function UserFullProfile( Request $request ) {
-        $email = $request->header( 'email' );
+        $id = 0;
 
-        $user = User::with( 'UserDetail' )->where( 'email', '=', $email )->first();
+        if ( $request->input( 'id' ) ) {
+            $id = $request->input( 'id' );
+        } else {
+            $id = $request->header( 'id' );
+        }
+
+        $user = User::with( 'UserDetail' )->where( 'id', '=', $id )->first();
 
         if ( $user !== null ) {
             return response()->json( [
@@ -511,7 +527,7 @@ class UserController extends Controller {
     // Employee List
     public function employeeList( Request $request ) {
         $user_email = $request->header( 'email' );
-        $data = User::with( 'UserDetail' )->where('email', '!=', $user_email)->get();
+        $data = User::with( 'UserDetail' )->where( 'email', '!=', $user_email )->get();
         if ( $data->count() == 0 ) {
             return response()->json( [
                 'status'  => 'error',
@@ -529,6 +545,7 @@ class UserController extends Controller {
     // Get Single Employee List
     public function singleEmployee( Request $request ) {
         $id = $request->input( 'id' );
+        // $employeeId =
         $data = User::with( 'UserDetail' )->where( 'id', '=', $id )->first();
 
         if ( $data ) {
@@ -586,5 +603,9 @@ class UserController extends Controller {
 
         }
     }
+
+
+
+
 
 }

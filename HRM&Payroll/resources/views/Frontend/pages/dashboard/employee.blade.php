@@ -4,4 +4,5 @@
     @include('Frontend.component.employee.employee-show')
     @include('Frontend.component.employee.employee-list')
     @include('Frontend.component.employee.employee-delete')
+    @include('Frontend.component.employee.employee-update')
 @endsection

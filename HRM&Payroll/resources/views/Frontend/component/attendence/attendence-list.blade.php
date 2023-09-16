@@ -4,22 +4,18 @@
             <div class="card px-5 py-5">
                 <div class="row justify-content-between ">
                     <div class="align-items-center col">
-                        <h4>Customer</h4>
-                    </div>
-                    <div class="align-items-center col">
-                        <button data-bs-toggle="modal" data-bs-target="#create-modal"
-                            class="float-end btn m-0 btn-sm bg-gradient-primary">Create</button>
+                        <h4>My Attendence</h4>
                     </div>
                 </div>
                 <hr class="bg-dark " />
                 <table class="table" id="tableData">
                     <thead>
                         <tr class="bg-light">
-                            <th>No</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Mobile</th>
-                            <th>Action</th>
+                            <th>Date</th>
+                            <th>In </th>
+                            <th>Out</th>
+                            <th>Duty Time</th>
+                            <th>Issue</th>
                         </tr>
                     </thead>
                     <tbody id="tableList">
@@ -39,8 +35,10 @@
         // swal("My title", "My description", "danger");
 
         showLoader();
-        let res = await axios.get("/employee-list");
+        let res = await axios.get("/my-attendence");
         hideLoader();
+
+        console.log(res.data);
 
 
         let tableData = $('#tableData');
@@ -51,19 +49,71 @@
 
 
         res.data['data'].forEach(function(item, index) {
+
+            let dutyTime = null;
+
+            // Time strings
+            const timeString1 = item.clock_in;
+            const timeString2 = item.clock_out;
+
+            // Validate the time strings
+            const timeFormatRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+            if (!timeFormatRegex.test(timeString1) || !timeFormatRegex.test(timeString2)) {
+                dutyTime = 'Error TimeFream';
+            } else {
+                // Split the time strings into hours, minutes, and seconds
+                const [hours1, minutes1, seconds1] = timeString1.split(':').map(Number);
+                const [hours2, minutes2, seconds2] = timeString2.split(':').map(Number);
+
+                // Calculate the time difference
+                const totalSeconds1 = hours1 * 3600 + minutes1 * 60 + seconds1;
+                const totalSeconds2 = hours2 * 3600 + minutes2 * 60 + seconds2;
+                const timeDifferenceInSeconds = Math.abs(totalSeconds2 - totalSeconds1);
+
+                // Calculate hours, minutes, and seconds from the time difference in seconds
+                const hoursDiff = Math.floor(timeDifferenceInSeconds / 3600);
+                const minutesDiff = Math.floor((timeDifferenceInSeconds % 3600) / 60);
+                const secondsDiff = timeDifferenceInSeconds % 60;
+
+                // Output the time difference
+                dutyTime = `${hoursDiff} h : ${minutesDiff} m : ${secondsDiff} s`;
+            }
+
+
+            const dateString = item.updated_at;
+            const datePart = dateString.match(/^\d{4}-\d{2}-\d{2}/)[0];
+
+
             let row = `<tr>
-                    <td>${index + 1}</td>
-                    <td>${item.firstName +" "+ item.lastName}</td>
-                    <td>${item.email}</td>
-                    <td>${item.mobile}</td>
-                    <td class="d-flex align-items-center">
-                        <i data-id="${item.id}" class="far fa-eye btn show  btn-sm btn-primary me-1" style="font-size: 18px;padding: 7px 18px;"></i>
-                        <i data-id="${item.id}" class="fas fa-pen editBtn btn btn-sm btn-success me-1" style="font-size: 18px;padding: 7px 18px;"></i>
-                        <i data-id="${item.id}" data-name="${item.firstName+" "+item.lastName}" class="fas fa-trash delete btn btn-sm btn-danger" style="font-size: 18px;padding: 7px 18px;"></i>
-                        
-                    </td>
+                    <td >${datePart}</td>`;
+
+
+            if (item.clock_in === null) {
+                row += `
+                    <td><span class="bg-danger text-white rounded px-4 py-1"> Absens </span></td>
+                    <td> -- </td>
+                    <td > -- </td>
+                    <td > <button class="bg-info btn btn-sm text-white"> Apply <i class="bi bi-person-exclamation" style="font-size: 18px"></i> </button> </td>
                 </tr>`;
+            } else if (item.clock_out === null) {
+                row += `
+                    <td>${item.clock_in}</td>
+                    <td> <span class="bg-warning text-dark rounded px-4 py-1"> Not Close </span> </td>
+                    <td > -- </td>
+                    <td > <button class="bg-info btn btn-sm text-white"> Apply <i class="bi bi-person-exclamation" style="font-size: 18px"></i> </button> </td>
+                </tr>`;
+            } else {
+                row += `
+                    <td>${item.clock_in}</td>
+                    <td> ${item.clock_in} </td>
+                    <td><span class="bg-primary text-white  rounded px-4 py-1"> ${dutyTime} </span></td>
+                    <td></td>
+                </tr>`;
+            }
+
             tableList.append(row);
+
+
         })
 
 
@@ -95,12 +145,12 @@
 
 
             if (data['user_detail']['profile'] === 'noImage') {
-                
+
                 $('#enewImg').attr("src", 'images/default.jpg');
 
-            } else if(data['user_detail']['profile']) {
+            } else if (data['user_detail']['profile']) {
                 $('#enewImg').attr("src", data['user_detail']['profile']);
-            }else{
+            } else {
                 $('#enewImg').attr("src", 'images/default.jpg');
             }
             document.getElementById('eaboutMe').value = data['user_detail']['about_me'];

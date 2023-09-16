@@ -92,13 +92,13 @@
             </div>
         </a>
 
-        <a href="" class="side-bar-item">
+        <a href="{{ url('/attendence') }}" class="side-bar-item">
             <div class="row ">
                 <div class="col-md-2">
-                    <i class="bi bi-list-nested"></i>
+                    <i class="bi bi-person-check"></i>
                 </div>
                 <div class="col-md-10">
-                    <span class="side-bar-item-caption">Category</span>
+                    <span class="side-bar-item-caption">My Attendence</span>
                 </div>
             </div>
         </a>
@@ -197,11 +197,11 @@
         }
 
 
-        getProfile()
-        async function getProfile() {
+        getProfileforUpdate()
+        async function getProfileforUpdate() {
 
             showLoader();
-            let res = await axios.get('/user-profile-full');
+            let res = await axios.post('/user-profile-full');
             hideLoader()
 
             // console.log(res.data)
@@ -218,6 +218,7 @@
                     $('.profilePic').attr("src", 'images/user.webp');
                 }
                 document.getElementById('userName').innerHTML = data['firstName'] + " " + data['lastName'];
+
 
 
             } else if (res.data['status'] === 'failed') {

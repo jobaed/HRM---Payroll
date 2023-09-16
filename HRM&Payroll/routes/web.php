@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\AttendanceRecordController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\TokenVerificationMiddleware;
+use App\Models\AttendanceRecord;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -59,12 +61,19 @@ Route::get( '/user-profile', [UserController::class, 'UserProfile'] )
     ->middleware( [TokenVerificationMiddleware::class] );
 
 // User Profile Data Full Detail
-Route::get( '/user-profile-full', [UserController::class, 'UserFullProfile'] )
+Route::post( '/user-profile-full', [UserController::class, 'UserFullProfile'] )
     ->middleware( [TokenVerificationMiddleware::class] );
 
 // User Profile Update
 Route::post( '/userUdate', [UserController::class, 'userUdate'] )
     ->middleware( [TokenVerificationMiddleware::class] );
+
+
+
+
+
+
+
 
 // Employee Module
 Route::get( '/employee', [UserController::class, 'userPageForAdmin'] )
@@ -75,3 +84,33 @@ Route::post( '/single-employee-list', [UserController::class, 'singleEmployee'] 
     ->middleware( [TokenVerificationMiddleware::class] );
 Route::post( '/delete-employee', [UserController::class, 'deleteEmployee'] )
     ->middleware( [TokenVerificationMiddleware::class] );
+
+
+
+
+
+
+
+
+
+// Attendence Section
+// in
+Route::post('/in-employee', [AttendanceRecordController::class, 'InAttendence'])
+    ->middleware( [TokenVerificationMiddleware::class] );
+
+// Out
+Route::post('/out-employee', [AttendanceRecordController::class, 'OutAttendence'])
+    ->middleware( [TokenVerificationMiddleware::class] );
+    
+// Today Attendence
+Route::get('/today-attendence', [AttendanceRecordController::class, 'getTodayAttendence'])
+    ->middleware( [TokenVerificationMiddleware::class] );
+
+// My Attendence 
+Route::get('/my-attendence', [AttendanceRecordController::class, 'myAttendence'])
+    ->middleware( [TokenVerificationMiddleware::class] );
+
+// Attendence
+Route::get('/attendence', [AttendanceRecordController::class,'attendencePage'])
+    ->middleware( [TokenVerificationMiddleware::class] );
+

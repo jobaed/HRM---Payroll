@@ -32,7 +32,7 @@
                             </div>
                             <div class="col-md-4 p-2">
                                 <label>Your Selary</label>
-                                <h4 class="bg-primary px-4 py-1 rounded text-light fw-bold">12,000</h4>
+                                <h4 class="bg-primary px-4 py-1 rounded text-light fw-bold" id="selary">12,000</h4>
                             </div>
                         </div>
 
@@ -51,6 +51,16 @@
                     <hr />
                     <div class="container-fluid m-0 p-0">
                         <div class="row m-0 p-0 d-flex align-items-center">
+                            <input type="hidden" name="" id="selary">
+                            <div class="col-md-6 p-2 d-none">
+                                <label>Role</label>
+                                <select name="" id="empRole" required class="form-control">
+                                    <option value="">Select Role</option>
+                                    <option value="user">user</option>
+                                    <option value="manager">manager</option>
+                                    <option value="admin">admin</option>
+                                </select>
+                            </div>
                             <div class="col-md-4 p-2">
                                 <label>Present Profile</label><br>
                                 <input type="hidden" name="" id="oldImage">
@@ -82,14 +92,16 @@
 </div>
 
 <script>
+
+    
     getProfile()
     async function getProfile() {
 
         showLoader();
-        let res = await axios.get('/user-profile-full');
+        let res = await axios.post('/user-profile-full');
         hideLoader()
 
-        // console.log(res.data)
+        console.log(res.data)
 
 
         if (res.status === 200 && res.data['status'] === 'success') {
@@ -101,6 +113,8 @@
             document.getElementById('lname').value = data['lastName'];
             document.getElementById('phone').value = data['mobile'];
             document.getElementById('password').value = data['password'];
+            document.getElementById('selary').value = data['user_detail']['selary'];
+            document.getElementById('selary').innerHTML = data['user_detail']['selary'];
 
             if (data['user_detail']['profile']) {
                 $('#newImg').attr("src", data['user_detail']['profile']);
@@ -111,7 +125,15 @@
 
             document.getElementById('aboutMe').value = data['user_detail']['about_me'];
 
-            // console.log(oldImg);
+
+            let role = data['role']; 
+
+            $('#empRole > option').each(function() {
+                if ($(this).val() === role) {
+                    $(this).attr("selected", "selected");
+                }
+            });
+
 
 
         } else if (res.data['status'] === 'failed') {
@@ -134,6 +156,9 @@
         let productImg = document.getElementById('productImg');
         let aboutMe = document.getElementById('aboutMe').value;
         let oldImg = document.getElementById('oldImage').value;
+        let role = document.getElementById('empRole').value;
+        let selary = document.getElementById('selary').value;
+        let email = document.getElementById('email').value;
         // console.log(oldImg);
 
 
@@ -157,6 +182,9 @@
             formData.append('profile', imageFile);
             formData.append('about_me', aboutMe);
             formData.append('old_img', oldImg);
+            formData.append('role', role);
+            formData.append('selary', selary);
+            formData.append('email', email);
 
             // console.log(formData);
             showLoader();
@@ -166,8 +194,8 @@
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            
-            // console.log(res.data);
+
+            console.log(res.data);
             hideLoader();
             if (res.status === 200 && res.data['status'] === "success") {
                 successToast('Profile Update');

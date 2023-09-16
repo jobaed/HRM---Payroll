@@ -1,7 +1,7 @@
 Featured Chat GPT Link: https://chat.openai.com/share/6a0b7381-fbd5-4c82-a6bd-c3aac830d9d1
 
 Featured: 
-1. Employee Information Management:
+1. Employee Information Management: (Done)
 
 Centralized database for storing and managing employee information.
 Employee profiles with personal details, contact information, work history, and performance records.
@@ -12,7 +12,7 @@ Job posting and application management.
 Interview scheduling and communication.
 New employee onboarding processes and document management.
 
-3. Time and Attendance:
+3. Time and Attendance: (Done)
 
 Time tracking and attendance recording.
 Integration with biometric devices, mobile apps, or web-based clock-ins.

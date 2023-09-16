@@ -1,4 +1,4 @@
-<div class="modal" id="show-modal">
+<div class="modal" id="profile-show-modal">
     <div class="modal-dialog modal-lg">
         <div class="modal-content" style="">
             <div class="modal-header" style="position: relative">
